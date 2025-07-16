@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useUserStore } from "../stores/useUserStore";
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -8,7 +9,7 @@ const SignupPage = () => {
     confirmPassword: "",
   });
 
-  const [loading, setLoading] = useState(false);
+  const { signup, loading } = useUserStore();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -17,13 +18,9 @@ const SignupPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      alert("Form Submitted:\n" + JSON.stringify(formData, null, 2));
-      setLoading(false);
-    }, 1500);
+    await signup(formData);
   };
 
   return (
