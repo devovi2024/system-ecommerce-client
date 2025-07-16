@@ -4,14 +4,13 @@ import { ShoppingCart, UserPlus, LogIn, Lock, LogOut } from 'lucide-react';
 
 const Navbar = () => {
   const user = false;
-  const isAdmin = true;
+  const isAdmin = false;
   const cartCount = 3;
 
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] backdrop-blur-md shadow-lg">
       <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         
-        {/* Logo */}
         <Link
           to="/"
           className="text-3xl font-extrabold text-white tracking-wider hover:scale-105 transition-transform duration-300"
@@ -27,7 +26,6 @@ const Navbar = () => {
           <Link to="/contact" className="text-slate-200 hover:text-blue-400 transition duration-300">Contact</Link>
         </nav>
 
-        {/* Icons */}
         <div className="flex items-center space-x-5 text-slate-200 text-sm">
 
           {/* If only user (not admin) */}
