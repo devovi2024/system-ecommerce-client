@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+// pages/AdminPage.jsx
+import React, { useEffect, useState } from 'react';
 import { PlusCircle, ShoppingBag, BarChart3 } from 'lucide-react';
 import CreateProductForm from '../components/CreateProductForm';
 import ProductList from '../components/ProductList';
 import Analytics from '../components/Analytics';
+import { useProductStore } from '../stores/useProductStore';
 
 const tabs = [
   { id: "create", label: "Create Product", icon: PlusCircle },
@@ -10,13 +12,13 @@ const tabs = [
   { id: "analytics", label: "Analytics", icon: BarChart3 },
 ];
 
-
-
-
-
-
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("create");
+  const { fetchAllProducts } = useProductStore();
+
+  useEffect(() => {
+    fetchAllProducts();
+  }, [fetchAllProducts]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-blue-950 p-8">
