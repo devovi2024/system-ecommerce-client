@@ -8,20 +8,24 @@ export const useUserStore = create((set) => ({
   checkingAuth: true,
 
   signup: async ({ name, email, password, confirmPassword }) => {
-    set({ loading: true });
-
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
-      set({ loading: false });
       return;
     }
 
+    set({ loading: true });
+
     try {
-      const res = await axios.post("/auth/signup", { name, email, password });
-      set({ user: res.data.user, loading: false });
+      const res = await axios.post("/auth/signup", {
+        name,
+        email,
+        password,
+      });
+      set({ user: res.data.user });
       toast.success("Signup successful!");
     } catch (err) {
       toast.error(err.response?.data?.message || "Signup failed");
+    } finally {
       set({ loading: false });
     }
   },
@@ -31,10 +35,11 @@ export const useUserStore = create((set) => ({
 
     try {
       const res = await axios.post("/auth/login", { email, password });
-      set({ user: res.data.user, loading: false });
+      set({ user: res.data.user });
       toast.success("Login successful!");
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");
+    } finally {
       set({ loading: false });
     }
   },
@@ -45,15 +50,16 @@ export const useUserStore = create((set) => ({
       set({ user: null });
       toast.success("Logged out");
     } catch (err) {
-      toast.error("Logout failed");
+      toast.error(err.response?.data?.message || "Logout failed");
     }
   },
 
   checkAuth: async () => {
     try {
       const res = await axios.get("/auth/profile");
-      set({ user: res.data.user, checkingAuth: false });
+      set({ user: res.data.user });
     } catch (err) {
+    } finally {
       set({ checkingAuth: false });
     }
   },

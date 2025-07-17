@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { useUserStore } from "./stores/useUserStore";
+import AdminPage from "./pages/AdminPage";
 
 function App() {
   const { user, checkAuth, checkingAuth, loading } = useUserStore();
@@ -27,6 +28,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={!user ? <SignupPage /> : <Navigate to="/" />} />
         <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
+        <Route path="/secret-dashboard" element={user?.role === "admin" ? <AdminPage/> : <Navigate to="/" />}/>
       </Routes>
 
       <Toaster position="top-right" reverseOrder={false} />

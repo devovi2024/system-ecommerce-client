@@ -6,7 +6,7 @@ import { useUserStore } from '../stores/useUserStore';
 const Navbar = () => {
   const { user, logout } = useUserStore();
   const isAdmin = user?.role === "admin";
-  const cartCount = 3; // Replace with dynamic count if needed
+  const cartCount = 3; 
 
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] backdrop-blur-md shadow-lg">
@@ -36,7 +36,7 @@ const Navbar = () => {
           )}
 
           {isAdmin && (
-            <Link to="/dashboard" className="flex items-center gap-1 hover:text-blue-400 transition">
+            <Link to="/secret-dashboard" className="flex items-center gap-1 hover:text-blue-400 transition">
               <Lock className="w-5 h-5" />
               <span>Dashboard</span>
             </Link>
