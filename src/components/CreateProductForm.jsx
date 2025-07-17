@@ -1,121 +1,123 @@
-import React, { useState } from "react"; 
-import { PlusCircle, Upload, Loader } from "lucide-react";
+import React, { useState } from "react";
+import { Upload, Loader, PlusCircle } from "lucide-react";
+import { useProductStore } from "../stores/useProductStore";
 
 const categories = ["Electronics", "Clothes", "Furniture", "Books", "Sports"];
 
 const CreateProductForm = () => {
   const [formData, setFormData] = useState({
-    name: "",
+    title: "",
     description: "",
     price: "",
     category: "",
-    countInStock: "",
-    image: null,
   });
-
+  const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const { createProduct, loading } = useProductStore();
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
     if (name === "image" && files.length > 0) {
       const file = files[0];
+      setImageFile(file);
+
       const reader = new FileReader();
-
-      reader.onloadend = () => {
-        setFormData({
-          ...formData,
-          image: reader.result,
-        });
-        setImagePreview(reader.result);
-      };
-
+      reader.onloadend = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
     } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+      setFormData((prev) => ({
+        ...prev,
+        [name]: name === "price" ? Number(value) : value,
+      }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Submitted", formData);
+    if (!imageFile) return alert("Please upload an image!");
+
+    const data = new FormData();
+    data.append("title", formData.title);
+    data.append("description", formData.description);
+    data.append("price", formData.price);
+    data.append("category", formData.category);
+    data.append("image", imageFile);
+
+    await createProduct(data);
+
+    // Reset form
     setFormData({
-      name: "",
+      title: "",
       description: "",
       price: "",
       category: "",
-      countInStock: "",
-      image: null,
     });
+    setImageFile(null);
     setImagePreview(null);
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-[#0f172a] text-white p-8 rounded-xl shadow-lg"
+      className="bg-white p-6 rounded-2xl shadow-lg max-w-lg mx-auto mt-10 space-y-6 border border-gray-200"
     >
-      <h2 className="text-2xl font-semibold mb-6 text-blue-400">
+      <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+        <PlusCircle className="w-6 h-6 text-blue-600" />
         Create New Product
       </h2>
 
-
-      <div className="mb-4">
-        <label className="block mb-1 text-sm text-gray-300">Product Name</label>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Product Title</label>
         <input
           type="text"
-          name="name"
-          value={formData.name}
+          name="title"
+          value={formData.title}
           onChange={handleChange}
-          className="w-full p-2 rounded bg-[#1e293b] border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Enter product name"
+          placeholder="Enter product title"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
       </div>
 
-      <div className="mb-4">
-        <label className="block mb-1 text-sm text-gray-300">Description</label>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Description</label>
         <textarea
           name="description"
           value={formData.description}
           onChange={handleChange}
-          rows="3"
-          className="w-full p-2 rounded bg-[#1e293b] border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Enter description"
+          placeholder="Enter product description"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          rows={4}
           required
         />
       </div>
 
-      <div className="mb-4">
-        <label className="block mb-1 text-sm text-gray-300">Price</label>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Price</label>
         <input
           type="number"
           name="price"
           value={formData.price}
           onChange={handleChange}
-          className="w-full p-2 rounded bg-[#1e293b] border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter price"
-          required
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           min="0"
           step="0.01"
+          required
         />
       </div>
 
-      <div className="mb-4">
-        <label className="block mb-1 text-sm text-gray-300">Category</label>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Category</label>
         <select
           name="category"
           value={formData.category}
           onChange={handleChange}
-          className="w-full p-2 rounded bg-[#1e293b] border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         >
-          <option value="" disabled>
-            Select category
-          </option>
+          <option value="">Select category</option>
           {categories.map((cat) => (
             <option key={cat} value={cat}>
               {cat}
@@ -124,45 +126,42 @@ const CreateProductForm = () => {
         </select>
       </div>
 
-      <div className="mb-4">
-        <label className="block mb-1 text-sm text-gray-300">Count In Stock</label>
-        <input
-          type="number"
-          name="countInStock"
-          value={formData.countInStock}
-          onChange={handleChange}
-          className="w-full p-2 rounded bg-[#1e293b] border border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Enter stock quantity"
-          required
-          min="0"
-        />
-      </div>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Product Image</label>
+        <label className="flex items-center gap-3 cursor-pointer text-blue-600 hover:text-blue-800 font-medium">
+          <Upload className="w-5 h-5" />
+          Choose Image
+          <input
+            type="file"
+            name="image"
+            accept="image/*"
+            onChange={handleChange}
+            className="hidden"
+          />
+        </label>
 
-      <div className="mb-6">
-        <label className="block mb-1 text-sm text-gray-300">Upload Image</label>
-        <input
-          type="file"
-          name="image"
-          onChange={handleChange}
-          accept="image/*"
-          className="w-full p-2 rounded bg-[#1e293b] border border-blue-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-          required
-        />
+        {imagePreview && (
+          <img
+            src={imagePreview}
+            alt="Preview"
+            className="w-full h-48 object-cover rounded-lg border mt-2"
+          />
+        )}
       </div>
-
-      {imagePreview && (
-        <img
-          src={imagePreview}
-          alt="Preview"
-          className="mb-6 max-h-48 object-contain rounded-lg"
-        />
-      )}
 
       <button
         type="submit"
-        className="bg-blue-600 hover:bg-blue-700 transition-colors duration-200 text-white px-6 py-2 rounded-lg font-semibold w-full"
+        disabled={loading}
+        className="w-full bg-blue-600 hover:bg-blue-700 transition-colors duration-200 text-white px-6 py-2 rounded-xl font-semibold"
       >
-        Create Product
+        {loading ? (
+          <div className="flex items-center justify-center gap-2">
+            <Loader className="animate-spin w-5 h-5" />
+            Creating...
+          </div>
+        ) : (
+          "Create Product"
+        )}
       </button>
     </form>
   );
