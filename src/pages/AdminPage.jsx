@@ -1,4 +1,3 @@
-// pages/AdminPage.jsx
 import React, { useEffect, useState } from 'react';
 import { PlusCircle, ShoppingBag, BarChart3 } from 'lucide-react';
 import CreateProductForm from '../components/CreateProductForm';
