@@ -45,8 +45,44 @@ export const useProductStore = create(
       },
 
 
-      deleteProduct: async (id) => {},
-      toggleFeaturedProduct: async (id) => {},
+        deleteProduct: async (productId) => {
+          set({ loading: true });
+
+          try {
+            await axiosInstance.delete(`/products/${productId}`);
+            set((state) => ({
+              products: state.products.filter((product) => product._id !== productId),
+              loading: false,
+            }));
+            toast.success("Product deleted successfully!");
+          } catch (error) {
+            console.error("Error deleting product:", error.response?.data || error.message);
+            toast.error(error.response?.data?.message || "Failed to delete product.");
+            set({ loading: false });
+            
+          }
+
+
+        },       
+        
+        toggleFeaturedProduct: async (productId) => {
+          try {
+            const response = await axiosInstance.patch(`/products/${productId}`);
+            const updatedFeatured = response.data.featured; // 👈 match the field name
+
+            set((state) => ({
+              products: state.products.map((product) =>
+                product._id === productId ? { ...product, featured: updatedFeatured } : product
+              ),
+              loading: false,
+            }));
+          } catch (error) {
+            console.error("Error toggling featured:", error.response?.data || error.message);
+            toast.error(error.response?.data?.message || "Failed to toggle featured.");
+            set({ loading: false });
+          }
+        },
+
     }),
     {
       name: "product-store", 

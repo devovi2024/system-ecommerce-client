@@ -25,7 +25,6 @@ export default function AdminPage() {
         Admin Dashboard
       </h1>
 
-      {/* Tab Buttons */}
       <div className="flex justify-center gap-6 mb-10">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -47,7 +46,6 @@ export default function AdminPage() {
         })}
       </div>
 
-      {/* Tab Content */}
       <div className="max-w-4xl mx-auto">
         {activeTab === "create" && <CreateProductForm />}
         {activeTab === "products" && <ProductList />}
