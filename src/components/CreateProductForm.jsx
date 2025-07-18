@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useState } from "react";
 import { Upload, Loader, PlusCircle, ChevronDown } from "lucide-react";
 import { useProductStore } from "../stores/useProductStore";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,6 +16,7 @@ const CreateProductForm = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [open, setOpen] = useState(false);
+
   const { createProduct, loading } = useProductStore();
 
   const handleChange = (e) => {
@@ -31,24 +32,34 @@ const CreateProductForm = () => {
     } else {
       setFormData((prev) => ({
         ...prev,
-        [name]: name === "price" ? Number(value) : value,
+        [name]: name === "price" ? (value === "" ? "" : Number(value)) : value,
       }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!imageFile) return alert("Please upload an image!");
+
+    if (!imageFile) {
+      alert("Please upload an image!");
+      return;
+    }
+
+    if (!formData.category) {
+      alert("Please select a category!");
+      return;
+    }
 
     const data = new FormData();
     data.append("title", formData.title);
     data.append("description", formData.description);
-    data.append("price", formData.price);
-    data.append("category", formData.category);
+    data.append("price", formData.price); 
+    data.append("category", formData.category.toLowerCase());
     data.append("image", imageFile);
 
     await createProduct(data);
 
+    // reset form
     setFormData({
       title: "",
       description: "",
@@ -57,6 +68,7 @@ const CreateProductForm = () => {
     });
     setImageFile(null);
     setImagePreview(null);
+    setOpen(false);
   };
 
   const handleSelect = (val) => {
@@ -168,6 +180,7 @@ const CreateProductForm = () => {
               accept="image/*"
               onChange={handleChange}
               className="hidden"
+              required={!imagePreview}
             />
           </label>
 
