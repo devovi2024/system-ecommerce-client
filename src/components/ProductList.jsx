@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import { useProductStore } from "../stores/useProductStore";
 import { motion } from "framer-motion";
 import { Star, Trash2 } from "lucide-react";
-import ConfirmModal from "./ConfirmModal"; // Import modal
+import ConfirmModal from "./ConfirmModal";
 
 const ProductList = () => {
   const { products, deleteProduct, toggleFeaturedProduct } = useProductStore();
-
-  // State for modal control
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
@@ -20,19 +18,18 @@ const ProductList = () => {
   const handleConfirmDelete = async () => {
     setLoading(true);
     try {
-      await deleteProduct(selectedProductId); // assuming deleteProduct returns a promise
+      await deleteProduct(selectedProductId);
       setConfirmOpen(false);
       setSelectedProductId(null);
     } catch (error) {
       console.error("Delete failed:", error);
-      // optionally handle error here
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancelDelete = () => {
-    if (loading) return; // prevent cancel during loading
+    if (loading) return;
     setConfirmOpen(false);
     setSelectedProductId(null);
   };
@@ -106,7 +103,7 @@ const ProductList = () => {
                       onClick={() => handleDeleteClick(product._id)}
                       className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1 rounded flex items-center gap-1"
                       aria-label="Delete Product"
-                      disabled={loading && selectedProductId === product._id} // disable if loading this product
+                      disabled={loading && selectedProductId === product._id}
                     >
                       <Trash2 size={16} />
                       Delete
