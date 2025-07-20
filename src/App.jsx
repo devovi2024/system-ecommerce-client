@@ -6,10 +6,12 @@ import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import LoadingSpinner from "./components/LoadingSpinner";
-import { useUserStore } from "./stores/useUserStore";
 import AdminPage from "./pages/AdminPage";
 import CategoryPage from "./pages/CategoryPage";
+import ProductDetails from "./pages/ProductDetails";
+import LoadingSpinner from "./components/LoadingSpinner";
+
+import { useUserStore } from "./stores/useUserStore";
 
 function App() {
   const { user, checkAuth, checkingAuth, loading } = useUserStore();
@@ -17,7 +19,6 @@ function App() {
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
-
 
   if (checkingAuth || loading) return <LoadingSpinner />;
 
@@ -27,11 +28,24 @@ function App() {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/signup" element={!user ? <SignupPage /> : <Navigate to="/" />} />
-        <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
-        <Route path="/secret-dashboard" element={user?.role === "admin" ? <AdminPage/> : <Navigate to="/" />}/>
-        <Route path="/category/:category" element={<CategoryPage />} />
 
+        <Route
+          path="/signup"
+          element={!user ? <SignupPage /> : <Navigate to="/" />}
+        />
+
+        <Route
+          path="/login"
+          element={!user ? <LoginPage /> : <Navigate to="/" />}
+        />
+
+        <Route
+          path="/secret-dashboard"
+          element={user?.role === "admin" ? <AdminPage /> : <Navigate to="/" />}
+        />
+
+        <Route path="/category/:category" element={<CategoryPage />} />
+        <Route path="/product/:id" element={<ProductDetails />} />
       </Routes>
 
       <Toaster position="top-right" reverseOrder={false} />

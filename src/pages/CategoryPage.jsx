@@ -1,53 +1,49 @@
-import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect } from "react";
 import { useProductStore } from "../stores/useProductStore";
+import { useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import ProductCard from "../components/ProductCard";
 
 const CategoryPage = () => {
-  const { category } = useParams();
-  const { fetchProductsByCategory, products, loading } = useProductStore();
+	const { fetchProductsByCategory, products } = useProductStore();
 
-  useEffect(() => {
-    if (category) {
-      fetchProductsByCategory(category.toLowerCase());
-    }
-  }, [category]);
+	const { category } = useParams();
 
-  return (
-    <div className="p-6 min-h-screen bg-gray-50">
-      <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
-        Collection: {category?.charAt(0).toUpperCase() + category?.slice(1)}
-      </h1>
+	useEffect(() => {
+		fetchProductsByCategory(category);
+	}, [fetchProductsByCategory, category]);
 
-      {loading ? (
-        <div className="text-center text-gray-500">Loading products...</div>
-      ) : products.length === 0 ? (
-        <div className="text-center text-red-500">No products found.</div>
-      ) : (
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {products.map((product) => (
-            <div
-              key={product._id}
-              className="bg-white p-4 rounded-xl shadow hover:shadow-lg transition duration-300"
-            >
-              <img
-                src={product.image || "https://via.placeholder.com/300x200"}
-                alt={product.title}
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-              <h2 className="text-lg font-semibold text-gray-800">{product.title}</h2>
-              <p className="text-gray-500 text-sm line-clamp-2 mb-2">
-                {product.description || "No description available."}
-              </p>
-              <div className="text-blue-600 font-bold text-lg">${product.price}</div>
-              <button className="mt-3 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-                View Details
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+	console.log("products:", products);
+	return (
+		<div className='min-h-screen'>
+			<div className='relative z-10 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16'>
+				<motion.h1
+					className='text-center text-4xl sm:text-5xl font-bold text-emerald-400 mb-8'
+					initial={{ opacity: 0, y: -20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.8 }}
+				>
+					{category.charAt(0).toUpperCase() + category.slice(1)}
+				</motion.h1>
+
+				<motion.div
+					className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center'
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.8, delay: 0.2 }}
+				>
+					{products?.length === 0 && (
+						<h2 className='text-3xl font-semibold text-gray-300 text-center col-span-full'>
+							No products found
+						</h2>
+					)}
+
+					{products?.map((product) => (
+						<ProductCard key={product._id} product={product} />
+					))}
+				</motion.div>
+			</div>
+		</div>
+	);
 };
-
 export default CategoryPage;
