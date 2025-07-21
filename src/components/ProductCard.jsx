@@ -1,53 +1,57 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { ShoppingCart } from "lucide-react";
-import { toast } from "react-hot-toast";
-import Swal from "sweetalert2";
 import { useUserStore } from "../stores/useUserStore";
+import { useCartStore } from "../stores/useCartStore";
 
 const ProductCard = ({ product }) => {
-  const { user } = useUserStore();
-  const navigate = useNavigate();
+  console.log("Product in ProductCard:", product);
 
-  const handleAddToCart = async (e) => {
-    e.preventDefault();
+  const { user } = useUserStore();
+  const { addToCart } = useCartStore();
+
+  const handleAddToCart = () => {
     if (!user) {
-      const res = await Swal.fire({
-        title: "Login Required",
-        text: "Please login to add products to cart.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Login",
-      });
-      if (res.isConfirmed) navigate("/login");
+      toast.error("Please login to add products to cart", { id: "login" });
       return;
     }
-
-    toast.success("Product added to cart");
+    if (!product?._id) {
+      toast.error("Product ID not found");
+      return;
+    }
+    addToCart(product);
   };
 
+  if (!product || !product._id) return null;
+
   return (
-    <Link
-      to={`/product/${product._id}`}
-      className="group block bg-white p-4 rounded-xl shadow hover:shadow-lg transition"
-    >
-      <img
-        src={product.image}
-        alt={product.name}
-        className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform"
-      />
+    <div className="flex w-full relative flex-col overflow-hidden rounded-lg border border-gray-700 shadow-lg">
+      <div className="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl">
+        <img
+          className="object-cover w-full"
+          src={product.image}
+          alt={product.name || "product image"}
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-20" />
+      </div>
 
-      <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-      <p className="text-gray-600 mb-3">${product.price}</p>
-
-      <button
-        onClick={handleAddToCart}
-        className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-      >
-        <ShoppingCart size={16} />
-        Add to Cart
-      </button>
-    </Link>
+      <div className="mt-4 px-5 pb-5">
+        <h5 className="text-xl font-semibold tracking-tight text-white">{product.name}</h5>
+        <div className="mt-2 mb-5 flex items-center justify-between">
+          <p>
+            <span className="text-3xl font-bold text-emerald-400">${product.price}</span>
+          </p>
+        </div>
+        <button
+          className="flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-center text-sm font-medium
+           text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
+          onClick={handleAddToCart}
+        >
+          <ShoppingCart size={22} className="mr-2" />
+          Add to cart
+        </button>
+      </div>
+    </div>
   );
 };
 

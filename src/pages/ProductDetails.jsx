@@ -3,6 +3,9 @@ import { useParams } from "react-router-dom";
 import { useProductStore } from "../stores/useProductStore";
 import ProductCard from "../components/ProductCard";
 
+
+
+
 const ProductDetails = () => {
   const { id } = useParams();
   const {
