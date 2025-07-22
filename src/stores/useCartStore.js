@@ -33,9 +33,6 @@ export const useCartStore = create((set, get) => ({
   removeFromCart: async (productId) => {
     try {
       await axios.delete(`/cart/${productId}`);
-      set((state) => ({
-        cart: state.cart.filter((item) => item._id !== productId),
-      }));
       toast.success("Product removed from cart");
       await get().getCartItems();
     } catch (error) {
@@ -45,36 +42,37 @@ export const useCartStore = create((set, get) => ({
 
   updateQuantity: async (productId, quantity) => {
     try {
-      if (quantity === 0) {
-        await get().removeFromCart(productId);
-        return;
-      }
+      if (quantity === 0) return await get().removeFromCart(productId);
       await axios.put(`/cart/${productId}`, { quantity });
       toast.success("Cart updated successfully");
-      set((state) => ({
-        cart: state.cart.map((item) =>
-          item._id === productId ? { ...item, quantity } : item
-        ),
-      }));
-      get().calculateTotals();
+      await get().getCartItems();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update cart");
-      set({ cart: [] });
-      await get().getCartItems();
+    }
+  },
+
+  applyCoupon: async (code) => {
+    try {
+      const res = await axios.get("/coupon/validate", { data: { code } });
+      set({ coupon: res.data, isCouponApplied: true });
+      get().calculateTotals();
+      toast.success("Coupon applied successfully!");
+    } catch (error) {
+      set({ coupon: null, isCouponApplied: false });
+      toast.error(error.response?.data?.message || "Invalid or expired coupon");
     }
   },
 
   calculateTotals: () => {
     const { cart, coupon } = get();
-    const subTotal = cart.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    );
+    const subTotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
     let total = subTotal;
-    if (coupon) {
+
+    if (coupon?.discountPercentage) {
       const discount = subTotal * (coupon.discountPercentage / 100);
       total = subTotal - discount;
     }
+
     set({ subtotal: subTotal, total });
   },
 }));
