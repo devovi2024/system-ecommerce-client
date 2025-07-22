@@ -14,6 +14,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 
 import { useUserStore } from "./stores/useUserStore";
 import { useCartStore } from "./stores/useCartStore";
+import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 
 function App() {
   const { user, checkAuth, checkingAuth, loading } = useUserStore();
@@ -56,6 +57,7 @@ function App() {
         <Route path="/category/:category" element={<CategoryPage />} />
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/purchase-success" element={user ? <PurchaseSuccessPage /> : <Navigate to={"/login"}/>} />
       </Routes>
 
       <Toaster position="top-right" reverseOrder={false} />
