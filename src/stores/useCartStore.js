@@ -53,7 +53,9 @@ export const useCartStore = create((set, get) => ({
 
   applyCoupon: async (code) => {
     try {
-      const res = await axios.get("/coupon/validate", { data: { code } });
+      const res = await axios.get("/coupon/validate", {
+        params: { code },
+      });
       set({ coupon: res.data, isCouponApplied: true });
       get().calculateTotals();
       toast.success("Coupon applied successfully!");
@@ -74,5 +76,15 @@ export const useCartStore = create((set, get) => ({
     }
 
     set({ subtotal: subTotal, total });
+  },
+
+  clearCart: () => {
+    set({
+      cart: [],
+      coupon: null,
+      total: 0,
+      subtotal: 0,
+      isCouponApplied: false,
+    });
   },
 }));
