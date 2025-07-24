@@ -16,14 +16,14 @@ export const useCartStore = create((set, get) => ({
       get().calculateTotals();
     } catch (error) {
       set({ cart: [] });
-      toast.error(error.response?.data?.message || "Failed to fetch cart");
+      toast.error(error.response?.data?.message || "Failed to fetch cart"); 
     }
   },
 
   addToCart: async (product) => {
     try {
       await axios.post("/cart", { productId: product._id });
-      toast.success("Product added to cart");
+      toast.success("Product added to cart"); 
       await get().getCartItems();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to add to cart");
@@ -33,10 +33,10 @@ export const useCartStore = create((set, get) => ({
   removeFromCart: async (productId) => {
     try {
       await axios.delete(`/cart/${productId}`);
-      toast.success("Product removed from cart");
+      toast.success("Product removed from cart"); 
       await get().getCartItems();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to remove from cart");
+      toast.error(error.response?.data?.message || "Failed to remove from cart"); 
     }
   },
 
@@ -44,29 +44,29 @@ export const useCartStore = create((set, get) => ({
     try {
       if (quantity === 0) return await get().removeFromCart(productId);
       await axios.put(`/cart/${productId}`, { quantity });
-      toast.success("Cart updated");
+      toast.success("Cart updated"); 
       await get().getCartItems();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Update failed");
+      toast.error(error.response?.data?.message || "Update failed"); 
     }
   },
 
   applyCoupon: async (code) => {
     try {
-      const res = await axios.post("/coupon", { code }); // ✅ match backend
+      const res = await axios.post("/coupon", { code });
       set({ coupon: res.data, isCouponApplied: true });
       get().calculateTotals();
-      toast.success("Coupon applied");
+      toast.success("Coupon applied"); 
     } catch (error) {
       set({ coupon: null, isCouponApplied: false });
-      toast.error(error.response?.data?.message || "Invalid or expired coupon");
+      toast.error(error.response?.data?.message || "Invalid or expired coupon"); 
     }
   },
 
   removeCoupon: () => {
     set({ coupon: null, isCouponApplied: false });
     get().calculateTotals();
-    toast.success("Coupon removed");
+    toast.success("Coupon removed"); 
   },
 
   calculateTotals: () => {
@@ -75,8 +75,7 @@ export const useCartStore = create((set, get) => ({
     let total = subtotal;
 
     if (coupon?.discountPercentage) {
-      const discount = subtotal * (coupon.discountPercentage / 100);
-      total = subtotal - discount;
+      total = subtotal - subtotal * (coupon.discountPercentage / 100);
     }
 
     set({ subtotal, total });

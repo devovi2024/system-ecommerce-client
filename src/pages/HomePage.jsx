@@ -1,26 +1,16 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
+import { useCategoryStore } from "../stores/useCategoryStore";
 import CategoryItem from "../components/CategoryItem";
-import { useProductStore } from "../stores/useProductStore";
-
-const categories = [
-  { href: "/jeans", name: "Jeans", imageUrl: "/jeans.jpg" },
-  { href: "/t-shirts", name: "T-shirts", imageUrl: "/tshirts.jpg" },
-  { href: "/shoes", name: "Shoes", imageUrl: "/shoes.jpg" },
-  { href: "/glasses", name: "Glasses", imageUrl: "/glasses.png" },
-  { href: "/jackets", name: "Jackets", imageUrl: "/jackets.jpg" },
-  { href: "/suits", name: "Suits", imageUrl: "/suits.jpg" },
-  { href: "/bags", name: "Bags", imageUrl: "/bags.jpg" },
-];
 
 const HomePage = () => {
-  const { fetchFeaturedProducts } = useProductStore();
+  const { categories, fetchCategories, loading, error } = useCategoryStore();
 
   useEffect(() => {
-    fetchFeaturedProducts();
-  }, [fetchFeaturedProducts]);
+    fetchCategories();
+  }, [fetchCategories]);
 
   return (
-    <div className="relative min-h-screen text-white overflow-hidden">
+    <div className="relative min-h-screen bg-gray-900 overflow-hidden">
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <h1 className="text-center text-5xl sm:text-6xl font-bold text-emerald-400 mb-4">
           Explore Our Categories
@@ -29,9 +19,12 @@ const HomePage = () => {
           Discover the latest trends in eco-friendly fashion
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {loading && <p className="text-center text-gray-400">Loading categories...</p>}
+        {error && <p className="text-center text-red-500">Error: {error}</p>}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {categories.map((category) => (
-            <CategoryItem category={category} key={category.name} />
+            <CategoryItem key={category._id} category={category} />
           ))}
         </div>
       </div>

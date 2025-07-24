@@ -84,9 +84,15 @@ const ProductList = () => {
                     )}
                     <span className="font-medium">{product.title}</span>
                   </td>
+
                   <td className="px-6 py-4">${product.price.toFixed(2)}</td>
-                  <td className="px-6 py-4 capitalize">{product.category}</td>
+
+                  <td className="px-6 py-4 capitalize">
+                    {product.category?.name || "N/A"}
+                  </td>
+
                   <td className="px-6 py-4">{product.countStock}</td>
+
                   <td className="px-6 py-4">
                     <button
                       onClick={() => toggleFeaturedProduct(product._id)}
@@ -95,9 +101,13 @@ const ProductList = () => {
                       }`}
                       aria-label="Toggle Featured"
                     >
-                      <Star size={20} fill={product.featured ? "yellow" : "none"} />
+                      <Star
+                        size={20}
+                        fill={product.featured ? "yellow" : "none"}
+                      />
                     </button>
                   </td>
+
                   <td className="px-6 py-4">
                     <button
                       onClick={() => handleDeleteClick(product._id)}

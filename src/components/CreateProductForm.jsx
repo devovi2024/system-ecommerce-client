@@ -1,207 +1,140 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PlusCircle, Upload, Loader } from "lucide-react";
 import { useProductStore } from "../stores/useProductStore";
-
-const categories = ["jeans", "t-shirts", "shoes", "glasses", "jackets", "suits", "bags"];
+import { useCategoryStore } from "../stores/useCategoryStore";
 
 const CreateProductForm = () => {
+  const { createProduct, loading } = useProductStore();
+  const { categories, fetchCategories } = useCategoryStore();
+
   const [newProduct, setNewProduct] = useState({
     title: "",
     description: "",
     price: "",
-    category: "",
     image: "",
+    category: "",
   });
 
-  const { createProduct, loading } = useProductStore();
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await createProduct(newProduct);
-      setNewProduct({
-        title: "",
-        description: "",
-        price: "",
-        category: "",
-        image: "",
-      });
-    } catch {
-      console.log("error creating a product");
-    }
+  const handleChange = (e) => {
+    setNewProduct({ ...newProduct, [e.target.name]: e.target.value });
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewProduct({ ...newProduct, image: reader.result });
-      };
-      reader.readAsDataURL(file);
-    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewProduct((prev) => ({ ...prev, image: reader.result }));
+    };
+    if (file) reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await createProduct(newProduct);
+    setNewProduct({
+      title: "",
+      description: "",
+      price: "",
+      image: "",
+      category: "",
+    });
   };
 
   return (
-    <motion.div
-      className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-xl p-8 max-w-xl mx-auto shadow-2xl"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02 }}
-      transition={{ duration: 0.6 }}
-    >
-      <h2 className="text-3xl font-extrabold mb-6 text-emerald-400 tracking-wide drop-shadow-md">
-        Create New Product
-      </h2>
+    <div className="min-h-screen bg-[#0b1120] flex items-center justify-center px-4 py-10">
+      <motion.form
+        onSubmit={handleSubmit}
+        className="w-full max-w-xl backdrop-blur-lg bg-white/5 border border-white/10 shadow-xl rounded-2xl p-8 space-y-6 text-white"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <h2 className="text-3xl font-bold text-center text-white tracking-wide">
+          Create Product
+        </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Product Title */}
-        <div>
-          <label
-            htmlFor="title"
-            className="block text-sm font-semibold text-gray-300 mb-1"
-          >
-            Product Name
-          </label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={newProduct.title}
-            onChange={(e) =>
-              setNewProduct({ ...newProduct, title: e.target.value })
-            }
-            className="w-full bg-gray-800 border border-gray-700 rounded-md py-3 px-4 text-white placeholder-gray-400 shadow-inner
-              focus:outline-none focus:ring-4 focus:ring-emerald-400 focus:ring-opacity-60 transition"
-            placeholder="Enter product name"
-            required
-          />
-        </div>
+        <input
+          name="title"
+          value={newProduct.title}
+          onChange={handleChange}
+          placeholder="Product Title"
+          className="w-full p-3 bg-white/10 border border-white/20 rounded-xl placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
+          required
+        />
 
-        {/* Description */}
-        <div>
-          <label
-            htmlFor="description"
-            className="block text-sm font-semibold text-gray-300 mb-1"
-          >
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={newProduct.description}
-            onChange={(e) =>
-              setNewProduct({ ...newProduct, description: e.target.value })
-            }
-            rows="4"
-            className="w-full bg-gray-800 border border-gray-700 rounded-md py-3 px-4 text-white placeholder-gray-400 shadow-inner
-              focus:outline-none focus:ring-4 focus:ring-emerald-400 focus:ring-opacity-60 transition resize-none"
-            placeholder="Write a brief product description"
-            required
-          />
-        </div>
+        <textarea
+          name="description"
+          value={newProduct.description}
+          onChange={handleChange}
+          placeholder="Description"
+          rows={4}
+          className="w-full p-3 bg-white/10 border border-white/20 rounded-xl placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 resize-none transition-all"
+          required
+        />
 
-        {/* Price */}
-        <div>
-          <label
-            htmlFor="price"
-            className="block text-sm font-semibold text-gray-300 mb-1"
-          >
-            Price
-          </label>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            value={newProduct.price}
-            onChange={(e) =>
-              setNewProduct({ ...newProduct, price: e.target.value })
-            }
-            step="0.01"
-            className="w-full bg-gray-800 border border-gray-700 rounded-md py-3 px-4 text-white placeholder-gray-400 shadow-inner
-              focus:outline-none focus:ring-4 focus:ring-emerald-400 focus:ring-opacity-60 transition"
-            placeholder="0.00"
-            required
-          />
-        </div>
+        <input
+          name="price"
+          type="number"
+          value={newProduct.price}
+          onChange={handleChange}
+          placeholder="Price ($)"
+          className="w-full p-3 bg-white/10 border border-white/20 rounded-xl placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
+          required
+        />
 
-        {/* Category */}
-        <div>
-          <label
-            htmlFor="category"
-            className="block text-sm font-semibold text-gray-300 mb-1"
-          >
-            Category
-          </label>
-          <select
-            id="category"
-            name="category"
-            value={newProduct.category}
-            onChange={(e) =>
-              setNewProduct({ ...newProduct, category: e.target.value })
-            }
-            className="w-full bg-gray-800 border border-gray-700 rounded-md py-3 px-4 text-white shadow-inner
-              focus:outline-none focus:ring-4 focus:ring-emerald-400 focus:ring-opacity-60 transition"
-            required
-          >
-            <option value="" disabled>
-              Select a category
+        <select
+          name="category"
+          value={newProduct.category}
+          onChange={handleChange}
+          className="w-full p-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
+          required
+        >
+          <option value="">Select Category</option>
+          {categories.map((cat) => (
+            <option key={cat._id} value={cat._id} className="text-black">
+              {cat.name}
             </option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat} className="text-gray-900">
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
+          ))}
+        </select>
 
-        {/* Image Upload */}
-        <div className="flex items-center space-x-4">
-          <input
-            type="file"
-            id="image"
-            className="sr-only"
-            accept="image/*"
-            onChange={handleImageChange}
-          />
-          <label
-            htmlFor="image"
-            className="flex items-center cursor-pointer bg-gradient-to-r from-emerald-600 to-emerald-400 hover:brightness-110
-              py-2 px-4 rounded-md shadow-md text-white font-semibold transition"
-          >
-            <Upload className="w-5 h-5 mr-2" />
-            Upload Image
+        <div>
+          <label className="block mb-2 text-sm text-gray-300">Upload Image</label>
+          <label className="flex items-center gap-3 cursor-pointer bg-white/10 border border-white/20 p-3 rounded-xl hover:bg-white/20 transition-all">
+            <Upload size={20} />
+            <span className="text-sm text-gray-200">Choose Image</span>
+            <input type="file" onChange={handleImageChange} className="hidden" />
           </label>
           {newProduct.image && (
-            <span className="text-sm text-emerald-300 font-medium select-none">
-              Image uploaded
-            </span>
+            <img
+              src={newProduct.image}
+              alt="Preview"
+              className="mt-4 h-40 w-full object-cover rounded-xl border border-white/10"
+            />
           )}
         </div>
 
-        {/* Submit Button */}
-        <button
+        <motion.button
+          whileTap={{ scale: 0.95 }}
           type="submit"
           disabled={loading}
-          className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-700
-            hover:from-emerald-600 hover:to-emerald-800 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed
-            py-3 rounded-lg text-white font-bold shadow-lg transition focus:outline-none focus:ring-4 focus:ring-emerald-400 focus:ring-opacity-60"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-6 rounded-xl flex items-center justify-center gap-2 font-semibold transition-all duration-300"
         >
           {loading ? (
-            <>
-              <Loader className="h-5 w-5 animate-spin" />
-              Loading...
-            </>
+            <Loader className="animate-spin" size={20} />
           ) : (
             <>
-              <PlusCircle className="h-5 w-5" />
+              <PlusCircle size={20} />
               Create Product
             </>
           )}
-        </button>
-      </form>
-    </motion.div>
+        </motion.button>
+      </motion.form>
+    </div>
   );
 };
 

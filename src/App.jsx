@@ -55,11 +55,15 @@ function App() {
           element={user?.role === "admin" ? <AdminPage /> : <Navigate to="/" />}
         />
 
-        <Route path="/category/:category" element={<CategoryPage />} />
+        <Route path="/categories/:category" element={<CategoryPage />} />
+
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<CartPage />} />
-        <Route path="/purchase-success" element={user ? <PurchaseSuccessPage /> : <Navigate to={"/login"}/>} />
-        <Route path="/purchase-cancel" element={<PurchaseCancelPage/>}/>
+        <Route
+          path="/purchase-success"
+          element={user ? <PurchaseSuccessPage /> : <Navigate to="/login" />}
+        />
+        <Route path="/purchase-cancel" element={<PurchaseCancelPage />} />
       </Routes>
 
       <Toaster position="top-right" reverseOrder={false} />

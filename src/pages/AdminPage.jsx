@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { PlusCircle, ShoppingBag, BarChart3 } from 'lucide-react';
+import { PlusCircle, ShoppingBag, BarChart3, Layers } from 'lucide-react';
 import CreateProductForm from '../components/CreateProductForm';
 import ProductList from '../components/ProductList';
 import Analytics from '../components/Analytics';
+import CategoryManager from '../components/CategoryManager';
 import { useProductStore } from '../stores/useProductStore';
 
 const tabs = [
   { id: "create", label: "Create Product", icon: PlusCircle },
   { id: "products", label: "Products", icon: ShoppingBag },
+  { id: "categories", label: "Categories", icon: Layers },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
 ];
 
@@ -25,7 +27,7 @@ export default function AdminPage() {
         Admin Dashboard
       </h1>
 
-      <div className="flex justify-center gap-6 mb-10">
+      <div className="flex justify-center gap-6 mb-10 flex-wrap">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -49,6 +51,7 @@ export default function AdminPage() {
       <div className="max-w-4xl mx-auto">
         {activeTab === "create" && <CreateProductForm />}
         {activeTab === "products" && <ProductList />}
+        {activeTab === "categories" && <CategoryManager />}
         {activeTab === "analytics" && <Analytics />}
       </div>
     </div>
