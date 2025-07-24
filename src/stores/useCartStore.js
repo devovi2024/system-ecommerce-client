@@ -44,38 +44,42 @@ export const useCartStore = create((set, get) => ({
     try {
       if (quantity === 0) return await get().removeFromCart(productId);
       await axios.put(`/cart/${productId}`, { quantity });
-      toast.success("Cart updated successfully");
+      toast.success("Cart updated");
       await get().getCartItems();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update cart");
+      toast.error(error.response?.data?.message || "Update failed");
     }
   },
 
   applyCoupon: async (code) => {
     try {
-      const res = await axios.get("/coupon/validate", {
-        params: { code },
-      });
+      const res = await axios.post("/coupon", { code }); // ✅ match backend
       set({ coupon: res.data, isCouponApplied: true });
       get().calculateTotals();
-      toast.success("Coupon applied successfully!");
+      toast.success("Coupon applied");
     } catch (error) {
       set({ coupon: null, isCouponApplied: false });
       toast.error(error.response?.data?.message || "Invalid or expired coupon");
     }
   },
 
+  removeCoupon: () => {
+    set({ coupon: null, isCouponApplied: false });
+    get().calculateTotals();
+    toast.success("Coupon removed");
+  },
+
   calculateTotals: () => {
     const { cart, coupon } = get();
-    const subTotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    let total = subTotal;
+    const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    let total = subtotal;
 
     if (coupon?.discountPercentage) {
-      const discount = subTotal * (coupon.discountPercentage / 100);
-      total = subTotal - discount;
+      const discount = subtotal * (coupon.discountPercentage / 100);
+      total = subtotal - discount;
     }
 
-    set({ subtotal: subTotal, total });
+    set({ subtotal, total });
   },
 
   clearCart: () => {
