@@ -1,13 +1,9 @@
-import React, { useEffect } from "react";
-import { useCategoryStore } from "../stores/useCategoryStore";
-import CategoryItem from "../components/CategoryItem";
+import CategoriesProductTab from "../components/CategoriesProductTab";
+import FeaturedProduct from "../components/FeaturedProduct";
+
 
 const HomePage = () => {
-  const { categories, fetchCategories, loading, error } = useCategoryStore();
 
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
 
   return (
     <div className="relative min-h-screen bg-gray-900 overflow-hidden">
@@ -18,15 +14,13 @@ const HomePage = () => {
         <p className="text-center text-xl text-gray-300 mb-12">
           Discover the latest trends in eco-friendly fashion
         </p>
+      </div>
 
-        {loading && <p className="text-center text-gray-400">Loading categories...</p>}
-        {error && <p className="text-center text-red-500">Error: {error}</p>}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {categories.map((category) => (
-            <CategoryItem key={category._id} category={category} />
-          ))}
-        </div>
+      <div>
+        <CategoriesProductTab/>
+      </div>
+      <div>
+        <FeaturedProduct/>
       </div>
     </div>
   );
