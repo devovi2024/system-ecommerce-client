@@ -1,3 +1,4 @@
+import BestRatting from "../components/BestRatting";
 import CategoriesProductTab from "../components/CategoriesProductTab";
 import FeaturedProduct from "../components/FeaturedProduct";
 
@@ -16,12 +17,17 @@ const HomePage = () => {
         </p>
       </div>
 
+
+      <div>
+        <BestRatting/>
+      </div>
       <div>
         <CategoriesProductTab/>
       </div>
       <div>
         <FeaturedProduct/>
       </div>
+      
     </div>
   );
 };

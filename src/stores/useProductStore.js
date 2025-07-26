@@ -4,8 +4,11 @@ import toast from "react-hot-toast";
 
 export const useProductStore = create((set) => ({
   products: [],
-  featuredProducts: [], // NEW STATE
+  featuredProducts: [],
   selectedProduct: null,
+  relatedProducts: [],
+  peopleAlsoBought: [],
+  topRated: [],
   loading: false,
   error: null,
 
@@ -98,10 +101,43 @@ export const useProductStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       const res = await axios.get("/products/featured");
-      set({ featuredProducts: res.data, loading: false, error: null }); // STORE SEPARATELY
+      set({ featuredProducts: res.data, loading: false, error: null });
     } catch (error) {
       set({ loading: false, error: "Failed to fetch featured products" });
       toast.error("Failed to fetch featured products");
+    }
+  },
+
+  fetchRelatedProducts: async (productId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await axios.get(`/products/related/${productId}`);
+      set({ relatedProducts: res.data.relatedProducts, loading: false });
+    } catch (error) {
+      set({ loading: false, error: "Failed to fetch related products" });
+      toast.error("Failed to fetch related products");
+    }
+  },
+
+  fetchPeopleAlsoBought: async (productId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await axios.get(`/products/people-also-bought/${productId}`);
+      set({ peopleAlsoBought: res.data.peopleAlsoBought || [], loading: false });
+    } catch (error) {
+      set({ loading: false, error: error.response?.data?.error || "Failed to fetch people also bought" });
+      toast.error(error.response?.data?.error || "Failed to fetch people also bought");
+    }
+  },
+
+fetchTopRated: async () => {
+    set({ loading: true, error: null });
+    try {
+      const res = await axios.get("/products/top-rated");
+      set({ topRated: res.data.products, loading: false });
+    } catch (err) {
+      set({ error: err.response?.data?.message || "Error", loading: false });
+      toast.error(err.response?.data?.message || "Failed to fetch top-rated");
     }
   },
 }));
