@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { ShoppingCart, Minus, Plus, Heart, HeartOff } from "lucide-react";
+import { ShoppingCart, Minus, Plus } from "lucide-react";
 
 import { useUserStore } from "../stores/useUserStore";
 import { useCartStore } from "../stores/useCartStore";
@@ -11,43 +11,33 @@ import ReviewSection from "../components/ReviewSection";
 import InfoButtons from "../components/InfoButtons";
 import RelatedProduct from "../components/RelatedProduct";
 import PeopleAlsoBought from "../components/PeopleAlsoBought ";
+import ActionMenu from "../components/ActionMenu";
 
 const ProductDetails = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const { user } = useUserStore();
   const { cart, addToCart, updateQuantity, removeFromCart } = useCartStore();
 
+  // Load product data
   useEffect(() => {
     axios
       .get(`/api/products/${id}`)
       .then((res) => setProduct(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err);
+        toast.error("Failed to load product");
+      });
   }, [id]);
 
-  useEffect(() => {
-    const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-    setIsWishlisted(wishlist.includes(id));
-  }, [id]);
+  if (!product) {
+    return <div className="text-center p-10 text-white">Loading...</div>;
+  }
 
-  const toggleWishlist = () => {
-    let wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-    if (wishlist.includes(id)) {
-      wishlist = wishlist.filter((pid) => pid !== id);
-      setIsWishlisted(false);
-      toast.success("Removed from wishlist");
-    } else {
-      wishlist.push(id);
-      setIsWishlisted(true);
-      toast.success("Added to wishlist");
-    }
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-  };
+  const cartItem = cart.find((item) => item._id === product._id);
 
-  const cartItem = cart.find((item) => item._id === product?._id);
-
+  // Cart handlers
   const handleAddToCart = () => {
     if (!user) return toast.error("Please login to add product to cart");
     addToCart(product);
@@ -65,9 +55,6 @@ const ProductDetails = () => {
     }
   };
 
-  if (!product)
-    return <div className="text-center p-10 text-white">Loading...</div>;
-
   return (
     <div className="max-w-5xl mx-auto p-6 mt-10 bg-[#0a1e3d] text-white rounded-xl shadow-xl">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -82,28 +69,8 @@ const ProductDetails = () => {
             ${product.price.toFixed(2)}
           </p>
           <p className="text-white/80 leading-relaxed">{product.description}</p>
+
           <div className="flex flex-wrap gap-4 items-center mt-4">
-            <button
-              onClick={toggleWishlist}
-              className={`flex items-center gap-2 px-5 py-3 rounded-full border ${
-                isWishlisted
-                  ? "bg-red-600 border-red-700"
-                  : "bg-white/10 border-white/20"
-              } hover:scale-105 transition`}
-              title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
-            >
-              {isWishlisted ? (
-                <>
-                  <HeartOff className="text-white" size={18} />
-                  <span className="text-sm">Wishlisted</span>
-                </>
-              ) : (
-                <>
-                  <Heart className="text-white" size={18} />
-                  <span className="text-sm">Add to Wishlist</span>
-                </>
-              )}
-            </button>
             {!cartItem ? (
               <button
                 onClick={handleAddToCart}
@@ -142,15 +109,15 @@ const ProductDetails = () => {
       <div className="mt-10">
         <InfoButtons />
       </div>
-
+      <div className="mt-10">
+        <ActionMenu />
+      </div>
       <div className="mt-10">
         <ReviewSection productId={id} userToken={user?.token} />
       </div>
-
       <div className="mt-10">
         <RelatedProduct productId={id} />
       </div>
-
       <div className="mt-10">
         <PeopleAlsoBought productId={product._id} />
       </div>

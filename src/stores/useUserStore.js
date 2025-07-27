@@ -16,11 +16,7 @@ export const useUserStore = create((set) => ({
     set({ loading: true });
 
     try {
-      const res = await axios.post("/auth/signup", {
-        name,
-        email,
-        password,
-      });
+      const res = await axios.post("/auth/signup", { name, email, password });
       set({ user: res.data.user });
       toast.success("Signup successful!");
     } catch (err) {
@@ -32,7 +28,6 @@ export const useUserStore = create((set) => ({
 
   login: async ({ email, password }) => {
     set({ loading: true });
-
     try {
       const res = await axios.post("/auth/login", { email, password });
       set({ user: res.data.user });
@@ -55,12 +50,41 @@ export const useUserStore = create((set) => ({
   },
 
   checkAuth: async () => {
+    set({ loading: true });
     try {
       const res = await axios.get("/auth/profile");
-      set({ user: res.data.user });
+      set({ user: res.data });
     } catch (err) {
+      set({ user: null });
     } finally {
-      set({ checkingAuth: false });
+      set({ checkingAuth: false, loading: false });
+    }
+  },
+
+  fetchProfile: async () => {
+    set({ loading: true });
+    try {
+      const res = await axios.get("/auth/profile");
+      set((state) => ({ user: { ...state.user, ...res.data } }));
+    } catch (err) {
+      toast.error("Failed to fetch profile");
+      console.error(err);
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  updateProfile: async (updatedData) => {
+    set({ loading: true });
+    try {
+      const res = await axios.put("/auth/profile", updatedData);
+      set((state) => ({ user: { ...state.user, ...res.data.user } }));
+      toast.success("Profile updated");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Profile update failed");
+      console.error("Update error:", err);
+    } finally {
+      set({ loading: false });
     }
   },
 }));

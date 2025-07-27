@@ -9,17 +9,14 @@ const BestRating = () => {
 
   useEffect(() => {
     fetchTopRated();
-  }, []);
+  }, [fetchTopRated]);
 
+  // Filter products with averageRating > 0
   const ratedProducts = topRated.filter((p) => p.averageRating > 0);
 
-  // 5 products per slide
   const productsPerSlide = 5;
-
-  // Total slides count
   const totalSlides = Math.ceil(ratedProducts.length / productsPerSlide);
 
-  // Prev and Next handlers
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
   };
@@ -27,25 +24,21 @@ const BestRating = () => {
     setCurrentIndex((prev) => (prev === totalSlides - 1 ? 0 : prev + 1));
   };
 
-  // Slice products for current slide
+  // Get current slide's products slice
   let currentSlideProducts = ratedProducts.slice(
     currentIndex * productsPerSlide,
     currentIndex * productsPerSlide + productsPerSlide
   );
 
-  // If last slide has fewer than 5 products, wrap around to fill
+  // If last slide has fewer than productsPerSlide, wrap around to fill
   if (currentSlideProducts.length < productsPerSlide && ratedProducts.length > 0) {
     currentSlideProducts = currentSlideProducts.concat(
       ratedProducts.slice(0, productsPerSlide - currentSlideProducts.length)
     );
   }
 
-  if (loading)
-    return <p className="text-center mt-10 text-lg font-medium">Loading...</p>;
-  if (error)
-    return (
-      <p className="text-red-500 text-center mt-10 text-lg font-medium">{error}</p>
-    );
+  if (loading) return <p className="text-center mt-10 text-lg font-medium">Loading...</p>;
+  if (error) return <p className="text-red-500 text-center mt-10 text-lg font-medium">{error}</p>;
   if (ratedProducts.length === 0)
     return (
       <p className="text-gray-500 text-center italic mt-10 text-lg">
@@ -90,9 +83,9 @@ const BestRating = () => {
 
           {/* Slider */}
           <div className="flex space-x-8 overflow-hidden">
-            {currentSlideProducts.map((product) => (
+            {currentSlideProducts.map((product, index) => (
               <div
-                key={product._id}
+                key={`${product._id}-${index}`}
                 className="flex-shrink-0 w-[20%] max-w-[20%]"
               >
                 <ProductCard product={product} large />

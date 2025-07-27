@@ -16,6 +16,7 @@ import { useUserStore } from "./stores/useUserStore";
 import { useCartStore } from "./stores/useCartStore";
 import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 import PurchaseCancelPage from "./pages/PurchaseCanclePage";
+import MySection from "./components/MyProfile/MySection";
 
 function App() {
   const { user, checkAuth, checkingAuth, loading } = useUserStore();
@@ -39,6 +40,12 @@ function App() {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
+
+
+        <Route 
+        path="/my-section"
+        element={<MySection/>}
+        />
 
         <Route
           path="/signup"
