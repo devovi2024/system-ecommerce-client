@@ -1,23 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+// components/MyProfile/MySection.jsx
+import React from "react";
 import Sidebar from "./Sidebar";
-import SectionContent from "./SectionContent";
+import SectionContent from ".//SectionContent";
 
-const MySection = () => {
-  const location = useLocation();
-  const defaultTab = location.state?.section || "My Orders";
-  const [active, setActive] = useState(defaultTab);
+const tabMap = {
+  order: "My Orders",
+  profile: "Profile",
+};
 
-  useEffect(() => {
-    if (location.state?.section) {
-      setActive(location.state.section);
-    }
-  }, [location.state]);
+const MySection = ({ activeTabParam }) => {
+  const tabTitle = tabMap[activeTabParam] || "My Orders";
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white">
-      <Sidebar activeTab={active} setActiveTab={setActive} />
-      <SectionContent section={active} />
+      <Sidebar activeTab={tabTitle} />
+      <SectionContent section={tabTitle} />
     </div>
   );
 };

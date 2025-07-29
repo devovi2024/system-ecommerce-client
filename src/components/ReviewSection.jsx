@@ -118,7 +118,7 @@ export default function ReviewSection({ productId }) {
             onClick={handleLoginClick}
             className="bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white font-semibold py-2 px-5 rounded-lg shadow-lg shadow-cyan-700/50 transition select-none"
           >
-            Please log in to write a review
+            Write a review
           </button>
         )}
       </div>

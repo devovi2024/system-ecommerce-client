@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 
 export const useProductStore = create((set) => ({
   products: [],
+  discountedProducts: [],
   featuredProducts: [],
   selectedProduct: null,
   relatedProducts: [],
@@ -14,86 +15,25 @@ export const useProductStore = create((set) => ({
 
   setProducts: (products) => set({ products }),
 
-  createProduct: async (productData) => {
-    set({ loading: true, error: null });
-    try {
-      const res = await axios.post("/products", productData);
-      set((state) => ({
-        products: [...state.products, res.data],
-        loading: false,
-        error: null,
-      }));
-      toast.success("Product created successfully!");
-    } catch (error) {
-      set({ loading: false, error: error.response?.data?.error || "Failed to create product" });
-      toast.error(error.response?.data?.error || "Failed to create product");
-    }
-  },
-
   fetchAllProducts: async () => {
     set({ loading: true, error: null });
     try {
       const res = await axios.get("/products");
-      set({ products: res.data.products, loading: false, error: null });
-    } catch (error) {
-      set({ loading: false, error: error.response?.data?.error || "Failed to fetch products" });
-      toast.error(error.response?.data?.error || "Failed to fetch products");
+      set({ products: res.data.products, loading: false });
+    } catch (err) {
+      set({ loading: false, error: err.response?.data?.message || "Failed to fetch products" });
+      toast.error("Failed to fetch products");
     }
   },
 
-  fetchProductById: async (id) => {
+  fetchDiscountedProducts: async () => {
     set({ loading: true, error: null });
     try {
-      const res = await axios.get(`/products/${id}`);
-      set({ selectedProduct: res.data, loading: false, error: null });
-    } catch (error) {
-      set({ selectedProduct: null, loading: false, error: error.response?.data?.error || "Product not found" });
-      toast.error(error.response?.data?.error || "Product not found");
-    }
-  },
-
-  fetchProductsByCategory: async (category) => {
-    set({ loading: true, error: null });
-    try {
-      const res = await axios.get(`/products/category/${category}`);
-      set({ products: res.data.products, loading: false, error: null });
-    } catch (error) {
-      set({ loading: false, error: error.response?.data?.error || "Failed to fetch category" });
-      toast.error(error.response?.data?.error || "Failed to fetch category");
-    }
-  },
-
-  deleteProduct: async (productId) => {
-    set({ loading: true, error: null });
-    try {
-      await axios.delete(`/products/${productId}`);
-      set((state) => ({
-        products: state.products.filter((p) => p._id !== productId),
-        loading: false,
-        error: null,
-      }));
-      toast.success("Product deleted");
-    } catch (error) {
-      set({ loading: false, error: error.response?.data?.error || "Failed to delete" });
-      toast.error(error.response?.data?.error || "Failed to delete");
-    }
-  },
-
-  toggleFeaturedProduct: async (productId) => {
-    set({ loading: true, error: null });
-    try {
-      const res = await axios.patch(`/products/${productId}`);
-      set((state) => ({
-        products: state.products.map((p) =>
-          p._id === productId ? { ...p, isFeatured: res.data.isFeatured } : p
-        ),
-        loading: false,
-        error: null,
-      }));
-      toast.success("Featured status toggled");
-    } catch (error) {
-      set({ loading: false, error: error.response?.data?.error || "Failed to toggle featured" });
-      toast.error(error.response?.data?.error || "Failed to toggle featured");
+      const res = await axios.get("/products/discounted");
+      set({ discountedProducts: res.data.products, loading: false });
+    } catch (err) {
+      set({ loading: false, error: err.response?.data?.message || "Failed to fetch discounted products" });
+      toast.error("Failed to fetch discounted products");
     }
   },
 
@@ -101,43 +41,136 @@ export const useProductStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       const res = await axios.get("/products/featured");
-      set({ featuredProducts: res.data, loading: false, error: null });
-    } catch (error) {
-      set({ loading: false, error: "Failed to fetch featured products" });
+      const unique = Array.from(new Map(res.data.map(p => [p._id, p])).values());
+      set({ featuredProducts: unique, loading: false });
+    } catch (err) {
+      set({ loading: false, error: err.response?.data?.message || "Failed to fetch featured products" });
       toast.error("Failed to fetch featured products");
     }
   },
 
-  fetchRelatedProducts: async (productId) => {
+  fetchProductById: async (id) => {
     set({ loading: true, error: null });
     try {
-      const res = await axios.get(`/products/related/${productId}`);
-      set({ relatedProducts: res.data.relatedProducts, loading: false });
-    } catch (error) {
-      set({ loading: false, error: "Failed to fetch related products" });
+      const res = await axios.get(`/products/${id}`);
+      set({ selectedProduct: res.data, loading: false });
+    } catch (err) {
+      set({ selectedProduct: null, loading: false, error: err.response?.data?.message || "Product not found" });
+      toast.error("Product not found");
+    }
+  },
+
+  fetchProductsByCategory: async (category) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await axios.get(`/products/category/${category}`);
+      set({ products: res.data.products, loading: false });
+    } catch (err) {
+      set({ loading: false, error: err.response?.data?.message || "Failed to fetch category products" });
+      toast.error("Failed to fetch category products");
+    }
+  },
+
+  createProduct: async (productData) => {
+    set({ loading: true, error: null });
+    try {
+      // productData should contain: title, description, price, images (array of base64 or URLs), category, discount (optional), stock
+      const res = await axios.post("/products", productData);
+      set((state) => ({
+        products: [...state.products, res.data],
+        loading: false,
+      }));
+      toast.success("Product created successfully");
+    } catch (err) {
+      set({ loading: false, error: err.response?.data?.message || "Failed to create product" });
+      toast.error("Failed to create product");
+    }
+  },
+
+  updateProduct: async (id, updatedData) => {
+    set({ loading: true, error: null });
+    try {
+      // updatedData can include stock and discount fields too
+      const res = await axios.patch(`/products/${id}`, updatedData);
+      set((state) => ({
+        products: state.products.map((p) => (p._id === id ? res.data : p)),
+        loading: false,
+      }));
+      // Update selectedProduct if currently loaded product is updated
+      set((state) => ({
+        selectedProduct: state.selectedProduct && state.selectedProduct._id === id ? res.data : state.selectedProduct,
+      }));
+      toast.success("Product updated successfully");
+    } catch (err) {
+      set({ loading: false, error: err.response?.data?.message || "Failed to update product" });
+      toast.error("Failed to update product");
+    }
+  },
+
+  deleteProduct: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      await axios.delete(`/products/${id}`);
+      set((state) => ({
+        products: state.products.filter((p) => p._id !== id),
+        loading: false,
+      }));
+      toast.success("Product deleted successfully");
+    } catch (err) {
+      set({ loading: false, error: err.response?.data?.message || "Failed to delete product" });
+      toast.error("Failed to delete product");
+    }
+  },
+
+  toggleFeaturedProduct: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await axios.patch(`/products/toggle-featured/${id}`);
+      set((state) => ({
+        products: state.products.map((p) =>
+          p._id === id ? { ...p, isFeatured: res.data.isFeatured } : p
+        ),
+        loading: false,
+      }));
+      toast.success("Featured status updated");
+    } catch (err) {
+      set({ loading: false, error: err.response?.data?.message || "Failed to toggle featured status" });
+      toast.error("Failed to toggle featured status");
+    }
+  },
+
+  fetchRelatedProducts: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await axios.get(`/products/related/${id}`);
+      set({ relatedProducts: res.data.relatedProducts || [], loading: false });
+    } catch (err) {
+      set({ loading: false, error: err.response?.data?.message || "Failed to fetch related products" });
       toast.error("Failed to fetch related products");
     }
   },
 
-  fetchPeopleAlsoBought: async (productId) => {
+  fetchPeopleAlsoBought: async (id) => {
     set({ loading: true, error: null });
     try {
-      const res = await axios.get(`/products/people-also-bought/${productId}`);
+      const res = await axios.get(`/products/people-also-bought/${id}`);
       set({ peopleAlsoBought: res.data.peopleAlsoBought || [], loading: false });
-    } catch (error) {
-      set({ loading: false, error: error.response?.data?.error || "Failed to fetch people also bought" });
-      toast.error(error.response?.data?.error || "Failed to fetch people also bought");
+    } catch (err) {
+      set({ loading: false, error: err.response?.data?.message || "Failed to fetch recommendations" });
+      toast.error("Failed to fetch recommendations");
     }
   },
 
-fetchTopRated: async () => {
+  fetchTopRated: async () => {
     set({ loading: true, error: null });
     try {
       const res = await axios.get("/products/top-rated");
-      set({ topRated: res.data.products, loading: false });
+      set({ topRated: res.data.products || [], loading: false });
     } catch (err) {
-      set({ error: err.response?.data?.message || "Error", loading: false });
-      toast.error(err.response?.data?.message || "Failed to fetch top-rated");
+      set({ loading: false, error: err.response?.data?.message || "Failed to fetch top-rated products" });
+      toast.error("Failed to fetch top-rated products");
     }
   },
+
+  clearError: () => set({ error: null }),
 }));

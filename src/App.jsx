@@ -6,17 +6,17 @@ import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import AdminPage from "./pages/AdminPage";
+import UserDashboard from "./pages/UserDashboard";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetails from "./pages/ProductDetails";
 import CartPage from "./pages/CartPage";
 import LoadingSpinner from "./components/LoadingSpinner";
+import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
+import PurchaseCancelPage from "./pages/PurchaseCanclePage";
+import AdminPage from "./pages/AdminPage";
 
 import { useUserStore } from "./stores/useUserStore";
 import { useCartStore } from "./stores/useCartStore";
-import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
-import PurchaseCancelPage from "./pages/PurchaseCanclePage";
-import MySection from "./components/MyProfile/MySection";
 
 function App() {
   const { user, checkAuth, checkingAuth, loading } = useUserStore();
@@ -41,29 +41,30 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
 
-
-        <Route 
-        path="/my-section"
-        element={<MySection/>}
-        />
-
+        {/* Admin Route */}
         <Route
-          path="/signup"
-          element={!user ? <SignupPage /> : <Navigate to="/" />}
-        />
-
-        <Route
-          path="/login"
-          element={!user ? <LoginPage /> : <Navigate to="/" />}
-        />
-
-        <Route
-          path="/secret-dashboard"
+          path="/admin-dashboard"
           element={user?.role === "admin" ? <AdminPage /> : <Navigate to="/" />}
         />
 
-        <Route path="/categories/:category" element={<CategoryPage />} />
+        {/* Redirect /my-section → /my-section/order */}
+        <Route path="/my-section" element={<Navigate to="/my-section/order" />} />
 
+        {/* User dashboard tabs */}
+        <Route
+          path="/my-section/:tab"
+          element={user && user.role !== "admin" ? <UserDashboard /> : <Navigate to="/" />}
+        />
+
+        {/* Auth */}
+        <Route path="/signup" element={!user ? <SignupPage /> : <Navigate to="/" />} />
+        <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
+
+        {/* Category page */}
+        <Route path="/shop" element={<CategoryPage />} />
+
+        {/* Other pages */}
+        <Route path="/categories/:category" element={<CategoryPage />} />
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<CartPage />} />
         <Route

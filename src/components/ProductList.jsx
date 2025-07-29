@@ -75,9 +75,9 @@ const ProductList = () => {
                   className="hover:bg-[#1c253a] border-b border-gray-700"
                 >
                   <td className="px-6 py-4 flex items-center gap-3">
-                    {product.image && (
+                    {product.images && product.images.length > 0 && (
                       <img
-                        src={product.image}
+                        src={product.images[0]} // show first image
                         alt={product.title}
                         className="w-10 h-10 object-cover rounded-md"
                       />

@@ -9,6 +9,7 @@ export const useCartStore = create((set, get) => ({
   subtotal: 0,
   isCouponApplied: false,
 
+  // Fetch cart items from backend (with discount info)
   getCartItems: async () => {
     try {
       const res = await axios.get("/cart");
@@ -16,14 +17,15 @@ export const useCartStore = create((set, get) => ({
       get().calculateTotals();
     } catch (error) {
       set({ cart: [] });
-      toast.error(error.response?.data?.message || "Failed to fetch cart"); 
+      toast.error(error.response?.data?.message || "Failed to fetch cart");
     }
   },
 
+  // Add product by product._id, backend handles quantity increment
   addToCart: async (product) => {
     try {
       await axios.post("/cart", { productId: product._id });
-      toast.success("Product added to cart"); 
+      toast.success("Product added to cart");
       await get().getCartItems();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to add to cart");
@@ -33,10 +35,10 @@ export const useCartStore = create((set, get) => ({
   removeFromCart: async (productId) => {
     try {
       await axios.delete(`/cart/${productId}`);
-      toast.success("Product removed from cart"); 
+      toast.success("Product removed from cart");
       await get().getCartItems();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to remove from cart"); 
+      toast.error(error.response?.data?.message || "Failed to remove from cart");
     }
   },
 
@@ -44,10 +46,10 @@ export const useCartStore = create((set, get) => ({
     try {
       if (quantity === 0) return await get().removeFromCart(productId);
       await axios.put(`/cart/${productId}`, { quantity });
-      toast.success("Cart updated"); 
+      toast.success("Cart updated");
       await get().getCartItems();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Update failed"); 
+      toast.error(error.response?.data?.message || "Update failed");
     }
   },
 
@@ -56,22 +58,26 @@ export const useCartStore = create((set, get) => ({
       const res = await axios.post("/coupon", { code });
       set({ coupon: res.data, isCouponApplied: true });
       get().calculateTotals();
-      toast.success("Coupon applied"); 
+      toast.success("Coupon applied");
     } catch (error) {
       set({ coupon: null, isCouponApplied: false });
-      toast.error(error.response?.data?.message || "Invalid or expired coupon"); 
+      toast.error(error.response?.data?.message || "Invalid or expired coupon");
     }
   },
 
   removeCoupon: () => {
     set({ coupon: null, isCouponApplied: false });
     get().calculateTotals();
-    toast.success("Coupon removed"); 
+    toast.success("Coupon removed");
   },
 
+  // Calculate totals based on discountedPrice (if available) else price
   calculateTotals: () => {
     const { cart, coupon } = get();
-    const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const subtotal = cart.reduce((acc, item) => {
+      const price = item.discountedPrice ?? item.price;
+      return acc + price * item.quantity;
+    }, 0);
     let total = subtotal;
 
     if (coupon?.discountPercentage) {

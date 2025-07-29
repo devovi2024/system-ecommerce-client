@@ -12,7 +12,8 @@ const CreateProductForm = () => {
     title: "",
     description: "",
     price: "",
-    image: "",
+    stock: "",             // Added stock field here
+    images: ["", "", "", ""],
     category: "",
   });
 
@@ -21,26 +22,56 @@ const CreateProductForm = () => {
   }, [fetchCategories]);
 
   const handleChange = (e) => {
-    setNewProduct({ ...newProduct, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setNewProduct((prev) => ({
+      ...prev,
+      [name]: name === "price" || name === "stock" ? Number(value) : value, // convert price and stock to Number
+    }));
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = (index, e) => {
     const file = e.target.files[0];
+    if (!file) return;
+
     const reader = new FileReader();
     reader.onloadend = () => {
-      setNewProduct((prev) => ({ ...prev, image: reader.result }));
+      const newImages = [...newProduct.images];
+      newImages[index] = reader.result;
+      setNewProduct((prev) => ({ ...prev, images: newImages }));
     };
-    if (file) reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await createProduct(newProduct);
+
+    // Validate stock
+    if (newProduct.stock === "" || newProduct.stock < 0) {
+      alert("Please enter a valid stock number (0 or greater).");
+      return;
+    }
+
+    // Filter out empty images before sending
+    const imagesToSend = newProduct.images.filter((img) => img !== "");
+
+    if (imagesToSend.length === 0) {
+      alert("Please upload at least one image.");
+      return;
+    }
+
+    const productData = {
+      ...newProduct,
+      images: imagesToSend,
+    };
+
+    await createProduct(productData);
+
     setNewProduct({
       title: "",
       description: "",
       price: "",
-      image: "",
+      stock: "",
+      images: ["", "", "", ""],
       category: "",
     });
   };
@@ -80,9 +111,21 @@ const CreateProductForm = () => {
         <input
           name="price"
           type="number"
+          min="0"
           value={newProduct.price}
           onChange={handleChange}
           placeholder="Price ($)"
+          className="w-full p-3 bg-white/10 border border-white/20 rounded-xl placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
+          required
+        />
+
+        <input
+          name="stock"
+          type="number"
+          min="0"
+          value={newProduct.stock}
+          onChange={handleChange}
+          placeholder="Stock Quantity"
           className="w-full p-3 bg-white/10 border border-white/20 rounded-xl placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
           required
         />
@@ -102,20 +145,29 @@ const CreateProductForm = () => {
           ))}
         </select>
 
-        <div>
-          <label className="block mb-2 text-sm text-gray-300">Upload Image</label>
-          <label className="flex items-center gap-3 cursor-pointer bg-white/10 border border-white/20 p-3 rounded-xl hover:bg-white/20 transition-all">
-            <Upload size={20} />
-            <span className="text-sm text-gray-200">Choose Image</span>
-            <input type="file" onChange={handleImageChange} className="hidden" />
-          </label>
-          {newProduct.image && (
-            <img
-              src={newProduct.image}
-              alt="Preview"
-              className="mt-4 h-40 w-full object-cover rounded-xl border border-white/10"
-            />
-          )}
+        <div className="grid grid-cols-2 gap-4">
+          {newProduct.images.map((img, i) => (
+            <div key={i}>
+              <label className="block mb-2 text-sm text-gray-300">Image {i + 1}</label>
+              <label className="flex items-center gap-3 cursor-pointer bg-white/10 border border-white/20 p-3 rounded-xl hover:bg-white/20 transition-all">
+                <Upload size={20} />
+                <span className="text-sm text-gray-200">Choose Image</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageChange(i, e)}
+                  className="hidden"
+                />
+              </label>
+              {img && (
+                <img
+                  src={img}
+                  alt={`Preview ${i + 1}`}
+                  className="mt-2 h-32 w-full object-cover rounded-xl border border-white/10"
+                />
+              )}
+            </div>
+          ))}
         </div>
 
         <motion.button

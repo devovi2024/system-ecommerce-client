@@ -17,16 +17,30 @@ const CartItem = ({ item }) => {
     updateQuantity(item._id, item.quantity + 1);
   };
 
+  const discount = item.discount || 0;
+  const originalPrice = item.price;
+  const discountedPrice =
+    discount > 0 ? originalPrice * (1 - discount / 100) : originalPrice;
+  const totalPrice = discountedPrice * item.quantity;
+
   return (
     <div className="flex items-center justify-between p-6 mb-4 rounded-2xl shadow-md bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100">
       <div className="flex items-center space-x-4 flex-1 min-w-0">
         <img
-          src={item.image}
+          src={item.images && item.images.length > 0 ? item.images[0] : "/placeholder.jpg"}
           alt={item.title}
           className="w-16 h-16 object-cover rounded-lg"
         />
         <div className="flex flex-col truncate">
           <span className="font-semibold truncate">{item.title}</span>
+          {discount > 0 && (
+            <span className="text-sm text-red-600 line-through">
+              ${originalPrice.toFixed(2)}
+            </span>
+          )}
+          <span className="text-green-600 font-semibold">
+            ${discountedPrice.toFixed(2)} each
+          </span>
         </div>
         <button
           onClick={() => removeFromCart(item._id)}
@@ -54,7 +68,7 @@ const CartItem = ({ item }) => {
           <Plus size={20} />
         </button>
         <span className="ml-4 font-semibold font-mono">
-          ${(item.price * item.quantity).toFixed(2)}
+          ${totalPrice.toFixed(2)}
         </span>
       </div>
     </div>

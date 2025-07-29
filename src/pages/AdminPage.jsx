@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { PlusCircle, ShoppingBag, BarChart3, Layers } from 'lucide-react';
+import { PlusCircle, ShoppingBag, BarChart3, Layers, Tag } from 'lucide-react'; // added Tag icon for Discount tab
 import CreateProductForm from '../components/CreateProductForm';
 import ProductList from '../components/ProductList';
 import Analytics from '../components/Analytics';
 import CategoryManager from '../components/CategoryManager';
+import DiscountManage from '../components/DiscountManage'; // import your discount component
 import { useProductStore } from '../stores/useProductStore';
 
 const tabs = [
@@ -11,6 +12,7 @@ const tabs = [
   { id: "products", label: "Products", icon: ShoppingBag },
   { id: "categories", label: "Categories", icon: Layers },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
+  { id: "discounts", label: "Discounts", icon: Tag }, // new Discounts tab
 ];
 
 export default function AdminPage() {
@@ -53,6 +55,7 @@ export default function AdminPage() {
         {activeTab === "products" && <ProductList />}
         {activeTab === "categories" && <CategoryManager />}
         {activeTab === "analytics" && <Analytics />}
+        {activeTab === "discounts" && <DiscountManage />} {/* Render DiscountProduct */}
       </div>
     </div>
   );

@@ -1,15 +1,15 @@
+// components/MyProfile/SectionContent.jsx
 import React from "react";
-import MyOrders from "../MyOrders";
-import ProfileForm from "./ProfileForm";
+import MyOrders from "../../components/MyOrders";
+import ProfileForm from "../../components/MyProfile/ProfileForm";
 
 const SectionContent = ({ section }) => {
   const renderContent = () => {
     switch (section) {
       case "My Orders":
         return <MyOrders />;
-        case "Profile" :
-            return <ProfileForm/>;
-       
+      case "Profile":
+        return <ProfileForm />;
       default:
         return (
           <div className="flex-1 p-10 text-slate-100">
